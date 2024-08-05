@@ -5,6 +5,7 @@ import { FaGlassCheers } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
 import NavLinks from "./nav-links";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 function SideNavbar() {
   const [open, setOpen] = useState(false);
@@ -16,12 +17,14 @@ function SideNavbar() {
 
   return (
     <>
-      <div className="lg:hidden flex text-secondary font-bold items-center p-4 my-2 ">
+      <div className="lg:hidden flex text-secondary font-bold items-center p-4 my-2 mt-12">
         <button id="menu-button" onClick={() => setOpen(!open)}>
           <GiHamburgerMenu className="h-6 w-6" aria-hidden="true" />
         </button>
         <div className="text-3xl flex grow justify-center mr-6">
+          <Link href="/dashboard">
           <FaGlassCheers />
+          </Link>
         </div>
       </div>
       <aside
@@ -30,7 +33,7 @@ function SideNavbar() {
           open ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 z-50 md:h-screen`}
       >
-        <div className="flex flex-col justify-start items-center text-secondary h-full">
+        <div className="flex flex-col justify-start items-center text-secondary h-full mt-12">
           <div className="flex justify-between items-center w-full">
             <h1 className="text-base text-center cursor-pointer font-bold border-b border-secondary_b pb-4 w-full">
               Yending App Dashboard
