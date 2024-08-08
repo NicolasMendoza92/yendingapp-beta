@@ -21,7 +21,7 @@ const CustomTextArea = ({name, label, required, initialValue}: CustomTextAreaPro
         id={name}
         name={name}
         required={required}
-        value={value}
+        value={value || ''}
         onChange={handleChange}
         className={`bg-transparent border border-secondary rounded-md my-2 w-full ${
           value ? 'text-secondary' : 'text-secondary'

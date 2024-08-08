@@ -54,3 +54,18 @@ export const updatedUser = async (formData: FormState) => {
     throw new Error('Error updating user')
   }
 }
+
+export const getUsers = async (previaId: string) => {
+  try {
+    const response = await customFetch({
+      path: `/api/users?previaId=${previaId}`,
+      method: 'GET',
+      withCredentials: false,
+    })
+    const data = await response.json()
+    return data?.users_data
+  } catch (error) {
+    console.error(error)
+    throw new Error('Error al obtener el usuario.')
+  }
+}

@@ -17,7 +17,7 @@ const CustomDropDowns = ({
   label,
   values,
   type,
-  initialValue
+  initialValue = '',
 }: CustomDropDownsProps) => {
   const [value, setValue] = useState(initialValue)
   const handleChange = (e: { target: any }) => {
@@ -45,7 +45,7 @@ const CustomDropDowns = ({
           <select
             id={name}
             name={name}
-            value={value as string}
+            value={value as string || ''}
             className={`w-full ${value ? 'text-secondary' : 'text-secondary'}`}
             onChange={handleChange}
 
@@ -56,7 +56,7 @@ const CustomDropDowns = ({
               </option>
             ))}
           </select>
-          <input type="hidden" name={name} value={value as string} />
+          <input type="hidden" name={name} value={value as string || ''} />
         </div>
       )}
     </>

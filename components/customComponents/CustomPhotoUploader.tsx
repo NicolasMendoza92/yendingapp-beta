@@ -12,7 +12,7 @@ type CustomPhotoUploaderProps = {
 const CustomPhotoUploader = ({
   name,
   label,
-  initialValue,
+  initialValue = '',
 }: CustomPhotoUploaderProps) => {
   const [value, setValue] = useState(initialValue);
 
@@ -55,7 +55,7 @@ const CustomPhotoUploader = ({
           </label>
         </div>
       )}
-      <input type="hidden" name={name} value={value} />
+      <input type="hidden" name={name} value={value || ''} />
     </div>
   );
 };

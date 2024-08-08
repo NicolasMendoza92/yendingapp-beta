@@ -18,3 +18,5 @@ export interface ValidatedErrors {
   errors: Record<string, any>
   message: string
 }
+
+export type UserFormState = FormState & { user_id: string }

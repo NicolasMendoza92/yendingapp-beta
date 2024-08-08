@@ -1,20 +1,20 @@
-import { auth } from '@/auth'
-import { prisma } from '@/auth.config'
-import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth';
+import { prisma } from '@/auth.config';
+import { NextRequest, NextResponse } from 'next/server';
 
 // actualizacion de el model User , añadiendo las previas que ha solicitado unirse .. modificamos el array previa_requests
 export async function PUT(req: NextRequest) {
-  const session = await auth()
-  const emailWanted = session?.user?.email || ""
+  const session = await auth();
+  const emailWanted = session?.user?.email || '';
 
   if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const { previaId }: { previaId: string } = await req.json()
+    const { previaId }: { previaId: string } = await req.json();
 
-    // const user_data = await prisma.users.findOneAndUpdate(
+    // const user_data = await prisma.user.findOneAndUpdate(
     //   { email: emailWanted },
     //   { $push: { previas_requests: previaId } },
     //   { new: true }
@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest) {
     // return NextResponse.json({ user_data }, { status: 200 })
 
     // Find the user by email
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         email: emailWanted,
       },
@@ -37,7 +37,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    const updatedUser = await prisma.users.update({
+    const updatedUser = await prisma.user.update({
       where: {
         email: emailWanted,
       },
@@ -50,7 +50,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ user: updatedUser }, { status: 200 });
   } catch (error) {
-    console.log(error)
-    return NextResponse.json({ message: 'An error occurred' }, { status: 500 })
+    console.log(error);
+    return NextResponse.json({ message: 'An error occurred' }, { status: 500 });
   }
 }

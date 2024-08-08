@@ -1,4 +1,5 @@
 export const baseUrl = process.env.BASE_URL;
+export const ablyApiKey = process.env.ABLY_API_KEY;
 export const today = new Date();
 
 //map

@@ -20,7 +20,54 @@ type PreviasJoinRequests {
   intentions String
   photos     String[]
   status     String
-  user_id    String
+  user_id    String?
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  token_type        String?
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  id_token          String? @db.String
+  scope             String?
+  session_state     String?
+  expires_at        Int?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model User {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  v                Int?      @map("__v")
+  about            String?
+  age              Int?
+  createdAt        DateTime?  @db.Date
+  dob_day          String?
+  dob_month        String?
+  dob_year         String?
+  email            String     @unique(map: "email_1")
+  emailVerified    DateTime?
+  gender_identity  String?
+  image            String?
+  name             String?
+  password         String?
+  previas_created  String[]
+  previas_interest String?
+  previas_requests String[]
+  show_interest    Boolean?
+  updatedAt        DateTime  @db.Date @updatedAt
+  url_img          String?
+  user_id          String?    @unique(map: "user_id_1")
+  Account          Account[]
+
+  @@map("users")
 }
 
 model previas {
@@ -56,67 +103,15 @@ model previausers {
   user_id    String   @unique @map("user_id")
 }
 
-model users {
-  id               String     @id @default(auto()) @map("_id") @db.ObjectId
-  v                Int?       @map("__v")
-  about            String?
-  age              Int?
-  createdAt        DateTime?  @db.Date
-  dob_day          String?
-  dob_month        String?
-  dob_year         String?
-  email            String     @unique(map: "email_1")
-  emailVerified    DateTime?
-  gender_identity  String?
-  image            String?
-  name             String?
-  password         String?
-  previas_created  String[]
-  previas_interest String?
-  previas_requests String[]
-  show_interest    Boolean?
-  updatedAt        DateTime   @updatedAt
-  url_img          String?
-  user_id          String     @unique(map: "user_id_1")
-  accounts         accounts[]
-  sessions         sessions[]
-}
-
-model accounts {
-  id                String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String  @db.ObjectId
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.String
-  access_token      String? @db.String
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.String
-  session_state     String?
-
-  createdAt DateTime @default(now())
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  channel   String
+  user_id   String
+  url_img   String?
+  name      String?
+  text      String
+  timestamp DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model sessions {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  sessionToken String   @unique
-  expires      DateTime
-  user         users    @relation(fields: [usersId], references: [id])
-  usersId      String   @db.ObjectId
-}
-
-model VerificationToken {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@unique([identifier, token])
+  @@unique([channel, user_id, timestamp])
 }

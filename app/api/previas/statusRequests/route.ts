@@ -37,7 +37,7 @@ export async function GET(req: Request) {
       (acc, previa) => {
         previa.join_requests.forEach((joinReq) => {
           const request: Requests = {
-            user_id: joinReq.user_id,
+            user_id: joinReq.user_id || '',
             attendants: joinReq.attendants,
             intentions: joinReq.intentions,
             photos: joinReq.photos,

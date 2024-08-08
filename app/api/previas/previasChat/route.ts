@@ -6,32 +6,31 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   try {
     const session = JSON.parse(req.headers.get('Authorization') || '{}');
-    const emailWanted = session?.user?.email || '';
-    const values = await prisma.user.findUnique({
-      where: { email: emailWanted },
-    });
 
-    const previas_ids = values?.previas_requests;
-    const user_id = values?.user_id;
-
-    if (!Array.isArray(previas_ids) || !previas_ids.length) {
-      return NextResponse.json({ message: 'No IDs provided' }, { status: 400 });
-    }
+    const user_id = session.user.userData?.user_id;
 
     let tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const previa_data = await prisma.previas.findMany({
       where: {
-        previa_id: { in: previas_ids },
         date: {
           gte: tomorrow,
         },
-        join_requests: {
-          some: {
-            user_id,
+        OR: [
+          {
+            join_requests: {
+              some: {
+                user_id,
+              },
+            },
           },
-        },
+          {
+            creator: {
+              is: { user_id },
+            },
+          },
+        ],
       },
     });
 
@@ -39,7 +38,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'Previa not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ previa_data, user_id }, { status: 200 });
+    return NextResponse.json({ previa_data }, { status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: 'Ha ocurrido un error' }, { status: 500 });

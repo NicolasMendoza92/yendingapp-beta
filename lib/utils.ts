@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { Creator, Previas } from '@/types/data';
-import { isBefore, isSameDay, format, compareAsc } from 'date-fns';
+import { isBefore, isSameDay, format, compareAsc, subDays, formatRelative } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { today } from '@/lib/constants';
 import { CreateUserFromSchema } from './schemas';
@@ -152,3 +152,5 @@ export const handleQueryParams = ({
 
   replace(`${pathname}?${params.toString()}`);
 };
+
+export const formatTime = (date?: number) => formatRelative(subDays(date || 0, 3), new Date());
