@@ -1,6 +1,7 @@
 import type { NextAuthConfig } from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { PrismaClient } from '@prisma/client'
+import Google from 'next-auth/providers/google'
 
 export const prisma = new PrismaClient()
 
@@ -14,5 +15,5 @@ export const authConfig = {
   pages: {
     signIn: '/auth/login',
   },
-  providers: []
+  providers: [Google]
 } satisfies NextAuthConfig

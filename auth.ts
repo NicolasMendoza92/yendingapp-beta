@@ -13,7 +13,10 @@ export const {
 } = NextAuth({
   ...authConfig,
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger, session, account}) {
+      if (account?.provider === 'google') {
+        token.accessToken = account.access_token;
+      }
       if (user && token) {
         token.userData = user
       }
@@ -23,7 +26,7 @@ export const {
       }
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token}) {
       if (token.sub && session.user) {
         session.user.id = token.sub
       }
@@ -40,8 +43,14 @@ export const {
           email: string
           password: string
         }
-        const user = await prisma.users.findUnique({ where: { email: email } })
-        if (user) {
+        console.log('Email:', email)
+        console.log('Password:', password)
+
+        try {
+          const user = await prisma.users.findUnique({ where: { email: email } })
+          console.log('User in auth.ts:', user)
+          if (!user || !user.password) return null
+
           const passwordMatch = await bcrypt.compare(
             password,
             user.password || ''
@@ -50,8 +59,10 @@ export const {
             return null
           }
           return user
+        } catch (error) {
+          console.error('Authorization error:', error)
+          return null
         }
-        return null
       }
     }),
     Google({
@@ -63,6 +74,15 @@ export const {
           access_type: "offline",
           response_type: "code",
         },
+      },
+      profile(profile) {
+        console.log('Google profile:', profile);
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        };
       },
     })
   ]

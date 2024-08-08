@@ -19,9 +19,11 @@ import {
   CreateLoginSchema,
   CreatePreviaFromSchema,
   CreateRequestJoinSchema,
+  RegisterSchema,
   UpdatePreviaFromSchema,
 } from "./schemas";
 import { FormState, ValidatedErrors } from "@/types/onboarding";
+import { z } from 'zod';
 
 export async function authenticate(
   _prevState: string | undefined,
@@ -32,15 +34,19 @@ export async function authenticate(
       email: formData.get("email"),
       password: formData.get("password"),
     });
-
     await signIn("credentials", { email, password, redirectTo: "/dashboard" });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: error.errors };
+    }
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
-          return "Invalid credentials.";
+          return { error: "Invalid credentials." };
+        case "CallbackRouteError":
+          return { error: "Invalid credentials." };
         default:
-          return "Something went wrong.";
+          return { error: "Invalid credentials." };
       }
     }
     throw error;
@@ -52,13 +58,13 @@ export async function signup(
   formData: FormData,
 ) {
   try {
-    const { email, password } = CreateLoginSchema.parse({
+    const { email, password } = RegisterSchema.parse({
       email: formData.get("email"),
       password: formData.get("password"),
     });
 
     const res = await signUp({ email, password });
-
+    console.log(res)
     if (!res.ok) {
       return { error: "Error signing up" };
     }
@@ -69,6 +75,9 @@ export async function signup(
       redirectTo: "/onboarding",
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: error.errors };
+    }
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":

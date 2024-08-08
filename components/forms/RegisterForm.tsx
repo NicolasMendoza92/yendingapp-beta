@@ -3,18 +3,30 @@ import { signup } from '@/lib/actions'
 import { Link } from 'next-view-transitions'
 import toast from 'react-hot-toast'
 import { CustomButton } from '../buttons/CustomButton'
+import { useState } from 'react'
 
 export default function RegisterForm() {
+  const [error, setError] = useState(false);
+
   const handleForm = async (formData: FormData) => {
     const res = await signup(undefined, formData)
     toast.dismiss()
     if (res?.error) {
-      toast.error(res.error)
+      if (Array.isArray(res.error)) {
+        res.error.forEach((err: { message: string }) => {
+          toast.error(err.message)
+          setError(true)
+        })
+      } else {
+        toast.error(res.error)
+        setError(true)
+      }
     } else {
       toast.success('Profile updated!')
+      setError(false)
     }
   }
-  const errorMessage = false
+
   return (
     <form action={handleForm} className="flex flex-col gap-3 px-6">
       <label>Put your email</label>
@@ -22,16 +34,14 @@ export default function RegisterForm() {
         type="email"
         name="email"
         color="white"
-        aria-errormessage={errorMessage ? 'This field is required' : ''}
-        className={errorMessage ? 'border-red-500 text-white' : ''}
+        className={error ? 'border-red-500 text-white' : ''}
       />
       <label>Choose your password</label>
       <input
         type="password"
         name="password"
         color="white"
-        aria-errormessage={errorMessage ? 'This field is required' : ''}
-        className={errorMessage ? 'border-red-500 text-white' : ''}
+        className={error ? 'border-red-500 text-white' : ''}
       />
       <CustomButton text="Register" />
       <Link className="text-sm mt-3" href={'/auth/login'} scroll={false}>

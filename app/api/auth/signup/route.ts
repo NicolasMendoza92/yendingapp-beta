@@ -8,15 +8,15 @@ export async function POST(req: NextRequest) {
     try {
         const { email, password } = await req.json();
         
-        const existentUser = await prisma.users.findUnique({
+        const existingUser = await prisma.users.findUnique({
             where:{
                 email:email,
             }
         });
 
-        if(existentUser){
+        if(existingUser){
             return NextResponse.json(
-                { message: "Usuario ya existe" },
+                { message: "Email already taken" },
                 { status: 400 }
             )
         }
@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
 
          const userData = {
             email,
+            emailVerified: new Date(),
             password: hashedPassword,
             user_id: generated_user_id,
             createdAt: new Date(),
@@ -35,6 +36,8 @@ export async function POST(req: NextRequest) {
         };
 
         await prisma.users.create({ data: userData});
+
+        // TODO: Sent verification token email
 
         return NextResponse.json(
             { message: "Usuario registrado" },

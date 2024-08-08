@@ -4,19 +4,20 @@ import { baseUrl } from '@/lib/constants'
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 type CustomFetchProps = {
-    path: string
+  path: string
   method: Method
   withCredentials: boolean
   body?: Record<string, any>
 }
 
 async function customFetch({
-    path,
+  path,
   method,
   withCredentials,
   body
 }: CustomFetchProps) {
   const session = await auth()
+  console.log('sesion customfetch', session)
 
   const headers = new Headers()
   headers.append('Content-Type', 'application/json')
