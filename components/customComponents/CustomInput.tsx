@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 type CustomInputProps = {
   name: string;
@@ -11,7 +11,6 @@ type CustomInputProps = {
   initialValue?: string;
   disabled?: boolean;
   customClass?: string;
-  onReset?: boolean;
 };
 
 const CustomInput = ({
@@ -22,10 +21,8 @@ const CustomInput = ({
   type,
   hasMax,
   hasMin,
-  initialValue = '',
+  initialValue,
   disabled,
-  customClass,
-  onReset,
 }: CustomInputProps) => {
   const [value, setValue] = useState(initialValue);
 
@@ -34,9 +31,9 @@ const CustomInput = ({
     setValue(e.target.value);
   };
 
-  useEffect(() => {
-    setValue('');
-  }, [onReset]);
+  // useEffect(() => {
+  //   setValue('');
+  // }, [onReset]);
 
   return (
     <>
@@ -47,11 +44,11 @@ const CustomInput = ({
         name={name}
         placeholder={placeholder}
         required={required}
-        value={value || ''}
+        value={value}
         onChange={handleChange}
         min={hasMin ? new Date().getFullYear() - 100 : undefined} // Optional: Adjust the range of years
         max={hasMax ? new Date().getFullYear() - 18 : undefined} // Optional: Adjust the range of years
-        className={customClass || `w-full ${value ? 'text-secondary' : 'text-secondary'}`}
+        className={`w-full ${value ? 'text-secondary' : 'text-secondary'}`}
         disabled={disabled}
       />
     </>

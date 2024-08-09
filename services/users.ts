@@ -1,5 +1,6 @@
 import { FormState } from '@/types/onboarding'
 import customFetch from './customFetch'
+import { prisma } from '@/auth.config'
 
 type SignUp = {
   email: string
@@ -67,5 +68,32 @@ export const getUsers = async (previaId: string) => {
   } catch (error) {
     console.error(error)
     throw new Error('Error al obtener el usuario.')
+  }
+}
+
+// añado unos generales para conseguir users
+export const getUserByEmail = async (email: string) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email
+      }
+    })
+    return user
+  } catch {
+    return null
+  }
+}
+
+export const getUserById = async (id: string) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id
+      }
+    })
+    return user
+  } catch {
+    return null
   }
 }

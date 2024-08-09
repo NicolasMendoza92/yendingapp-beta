@@ -10,7 +10,8 @@ export default function LoginForm() {
   const [error, setError] = useState(false);
 
   const handleLogin = async (formData: FormData) => {
-    const res = await authenticate(undefined, formData)
+    const res = await authenticate(undefined, formData);
+    console.log('response from authenticate: ',res)
     toast.dismiss()
     if (res?.error) {
       if (Array.isArray(res.error)) {

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/auth.config';
 import { v4 as uuidv4 } from 'uuid';
+import { generateVerificationToken } from '@/lib/tokens';
+import { sendVerificationEmail } from '@/lib/mail';
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +24,7 @@ export async function POST(req: NextRequest) {
 
     const userData = {
       email,
+      emailVerified : null,
       password: hashedPassword,
       user_id: generated_user_id,
       createdAt: new Date(),
@@ -32,7 +35,18 @@ export async function POST(req: NextRequest) {
 
     await prisma.user.create({ data: userData });
 
-    return NextResponse.json({ message: 'Usuario registrado' }, { status: 201 });
+    // generate a verification token 
+    const verificationToken = await generateVerificationToken(email);
+    console.log('verificationToken', verificationToken)
+
+    // import send an email function 
+
+    // await sendVerificationEmail(
+    //   verificationToken.email, 
+    //   verificationToken.token
+    // )
+
+    return NextResponse.json({ message: 'confirmation email sent' }, { status: 201 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: 'A ocurrido un error' }, { status: 500 });

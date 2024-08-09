@@ -46,8 +46,6 @@ export default function OnboardingForm({ user }: { user?: FormState }) {
             placeholder="First Name"
             required={true}
             type="text"
-            hasMin={false}
-            hasMax={false}
             initialValue={user?.name}
           />
           <div className="grid grid-cols-3 gap-2 my-3">

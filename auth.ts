@@ -3,6 +3,7 @@ import { authConfig, prisma } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
+import { getUserById } from './services/users';
 
 export const {
   handlers: { GET, POST },
@@ -13,10 +14,7 @@ export const {
 } = NextAuth({
   ...authConfig,
   callbacks: {
-    async jwt({ token, user, trigger, session, account}) {
-      if (account?.provider === 'google') {
-        token.accessToken = account.access_token;
-      }
+    async jwt({ token, user, trigger, session }) {
       if (user && token) {
         token.userData = user;
       }
@@ -26,7 +24,9 @@ export const {
       }
       return token;
     },
-    async session({ session, token}) {
+    async session({ session, token }) {
+      // console.log('en auth.ts', { sessionToken: token })
+      // esto para que siempre tengamos la info del id dentro de la session
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
@@ -35,6 +35,43 @@ export const {
       }
       return session;
     },
+    async signIn({ user, account }) {
+      // si hace login con google no hace falta verificar email
+      if (account?.provider !== "credentials") return true;
+      if (account?.provider === "credentials") {
+        console.log("whit crede")
+      };
+
+      // añado esto por un error verga de ts 
+      if (!user.id) {
+        console.error("user Id is missing")
+        return false
+      }
+
+      try {
+        
+        const existingUser = await getUserById(user.id);
+        console.log("email veri: ",existingUser?.emailVerified)
+        // evito el sing in sin email verification 
+        // if (!existingUser?.emailVerified) return false;
+
+        // TODO: Add 2factor auth 
+
+        return true
+      } catch (error) {
+        console.error("Error during signIn callback:", error);
+        return false;
+      }
+
+    }
+  },
+  events: {
+    async linkAccount({ user }) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() }
+      })
+    }
   },
   providers: [
     Credentials({

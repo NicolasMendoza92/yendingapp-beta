@@ -43,16 +43,23 @@ model Account {
   @@map("accounts")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+  GENERATOR
+  // ver de añadir lo que quieramos 
+}
+
 model User {
   id               String    @id @default(auto()) @map("_id") @db.ObjectId
   v                Int?      @map("__v")
   about            String?
   age              Int?
-  createdAt        DateTime?  @db.Date
+  createdAt        DateTime? @db.Date
   dob_day          String?
   dob_month        String?
   dob_year         String?
-  email            String     @unique(map: "email_1")
+  email            String    @unique(map: "email_1")
   emailVerified    DateTime?
   gender_identity  String?
   image            String?
@@ -62,10 +69,12 @@ model User {
   previas_interest String?
   previas_requests String[]
   show_interest    Boolean?
-  updatedAt        DateTime  @db.Date @updatedAt
+  updatedAt        DateTime  @updatedAt @db.Date
   url_img          String?
-  user_id          String?    @unique(map: "user_id_1")
+  user_id          String?   @unique(map: "user_id_1")
+  role             UserRole  @default(USER)
   Account          Account[]
+  Session          Session[]
 
   @@map("users")
 }
@@ -114,4 +123,26 @@ model Message {
   updatedAt DateTime @updatedAt
 
   @@unique([channel, user_id, timestamp])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String   @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
 }

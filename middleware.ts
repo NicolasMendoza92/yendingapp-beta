@@ -16,6 +16,7 @@ export default auth((req) => {
   }
 
   if (isAuthRoute) {
+    // Logica para el singIn con google provider
     if (isLoggedIn && (!hasUserId || !hasUserName)) {
       return Response.redirect(new URL('/onboarding', nextUrl));
     }

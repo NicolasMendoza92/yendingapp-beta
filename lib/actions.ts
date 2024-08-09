@@ -10,7 +10,7 @@ import {
   putJoinRequest,
   putPrevia,
 } from '@/services/previas';
-import { signUp, updatedUser } from '@/services/users';
+import { getUserByEmail, signUp, updatedUser } from '@/services/users';
 import type { UpdateJoinRequest } from '@/types/data';
 import { AuthError } from 'next-auth';
 import { revalidatePath } from 'next/cache';
@@ -19,19 +19,34 @@ import {
   CreateLoginSchema,
   CreatePreviaFromSchema,
   CreateRequestJoinSchema,
+  RegisterSchema,
   UpdatePreviaFromSchema,
 } from './schemas';
 import { FormState, ValidatedErrors } from '@/types/onboarding';
 import { postMessage } from '@/services/messages';
 import { z } from 'zod';
+import { generateVerificationToken } from './tokens';
+
 
 export async function authenticate(_prevState: string | undefined, formData: FormData) {
-  try {
-    const { email, password } = CreateLoginSchema.parse({
-      email: formData.get('email'),
-      password: formData.get('password'),
-    });
 
+  const { email, password } = CreateLoginSchema.parse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+  // primero vemos si esta validado el token, lo valido antes de llamar a autehnticate pero lo hago de nuevo 
+  const existingUser = await getUserByEmail(email)
+  if (!existingUser || !existingUser.email || !existingUser.password) {
+    return { error: "Email does not exist!" }
+  }
+
+  // if (!existingUser.emailVerified) {
+  //   const verificationToken = await generateVerificationToken(existingUser.email)
+  //   console.log('verifiTok: ', verificationToken)
+  //   return {success : "Confirmation email sent"}
+  // }
+
+  try {
     await signIn('credentials', { email, password, redirectTo: '/dashboard' });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -53,13 +68,13 @@ export async function authenticate(_prevState: string | undefined, formData: For
 
 export async function signup(_prevState: { error: string } | undefined, formData: FormData) {
   try {
-    const { email, password } = CreateLoginSchema.parse({
+    const { email, password } = RegisterSchema.parse({
       email: formData.get('email'),
       password: formData.get('password'),
     });
 
     const res = await signUp({ email, password });
-    console.log(res)
+
     if (!res.ok) {
       return { error: 'Error signing up' };
     }
