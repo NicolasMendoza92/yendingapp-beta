@@ -125,6 +125,7 @@ model Message {
   @@unique([channel, user_id, timestamp])
 }
 
+// AÑADO ESTOS DOS MODELOS
 model Session {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   sessionToken String   @unique

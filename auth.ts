@@ -13,6 +13,16 @@ export const {
   unstable_update: update,
 } = NextAuth({
   ...authConfig,
+  // Esto es para que cuando se verifique el email, actualice el emailVerified.
+  events: {
+    async linkAccount({ user }) {
+       const userToUpdate = await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() }
+      })
+      console.log("events: ", userToUpdate)
+    }
+  },
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user && token) {
@@ -25,8 +35,7 @@ export const {
       return token;
     },
     async session({ session, token }) {
-      // console.log('en auth.ts', { sessionToken: token })
-      // esto para que siempre tengamos la info del id dentro de la session
+
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
@@ -36,11 +45,12 @@ export const {
       return session;
     },
     async signIn({ user, account }) {
+      console.log({
+        user, 
+        account,
+      })
       // si hace login con google no hace falta verificar email
       if (account?.provider !== "credentials") return true;
-      if (account?.provider === "credentials") {
-        console.log("whit crede")
-      };
 
       // añado esto por un error verga de ts 
       if (!user.id) {
@@ -53,7 +63,7 @@ export const {
         const existingUser = await getUserById(user.id);
         console.log("email veri: ",existingUser?.emailVerified)
         // evito el sing in sin email verification 
-        // if (!existingUser?.emailVerified) return false;
+        if (!existingUser?.emailVerified) return false;
 
         // TODO: Add 2factor auth 
 
@@ -63,14 +73,6 @@ export const {
         return false;
       }
 
-    }
-  },
-  events: {
-    async linkAccount({ user }) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { emailVerified: new Date() }
-      })
     }
   },
   providers: [

@@ -16,12 +16,13 @@ export async function POST(req: NextRequest) {
     });
 
     if (existentUser) {
-      return NextResponse.json({ message: 'Usuario ya existe' }, { status: 400 });
+      return NextResponse.json({ message: 'Email already taken' }, { status: 400 });
     }
 
     const generated_user_id = uuidv4();
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Añadi emailVerified que se cree como null, por que no se creaba.- 
     const userData = {
       email,
       emailVerified : null,
@@ -41,12 +42,12 @@ export async function POST(req: NextRequest) {
 
     // import send an email function 
 
-    // await sendVerificationEmail(
-    //   verificationToken.email, 
-    //   verificationToken.token
-    // )
+    await sendVerificationEmail(
+      verificationToken.email, 
+      verificationToken.token
+    )
 
-    return NextResponse.json({ message: 'confirmation email sent' }, { status: 201 });
+    return NextResponse.json({ message: 'Confirmation email sent' }, { status: 201 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: 'A ocurrido un error' }, { status: 500 });

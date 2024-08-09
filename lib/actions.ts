@@ -34,17 +34,19 @@ export async function authenticate(_prevState: string | undefined, formData: For
     email: formData.get('email'),
     password: formData.get('password'),
   });
-  // primero vemos si esta validado el token, lo valido antes de llamar a autehnticate pero lo hago de nuevo 
+  // Añado esta logica para que no deje logear si no esta verificado el email
   const existingUser = await getUserByEmail(email)
+
   if (!existingUser || !existingUser.email || !existingUser.password) {
     return { error: "Email does not exist!" }
   }
 
-  // if (!existingUser.emailVerified) {
-  //   const verificationToken = await generateVerificationToken(existingUser.email)
-  //   console.log('verifiTok: ', verificationToken)
-  //   return {success : "Confirmation email sent"}
-  // }
+
+  if (!existingUser.emailVerified) {
+    const verificationToken = await generateVerificationToken(existingUser.email)
+    console.log('verifiTok: ', verificationToken)
+    return {success : "Confirmation email sent"}
+  }
 
   try {
     await signIn('credentials', { email, password, redirectTo: '/dashboard' });
@@ -59,7 +61,7 @@ export async function authenticate(_prevState: string | undefined, formData: For
         case "CallbackRouteError":
           return { error: "Invalid credentials." };
         default:
-          return { error: "Invalid credentials." };
+          return { error: "Something went wrong." };
       }
     }
     throw error;
@@ -67,18 +69,18 @@ export async function authenticate(_prevState: string | undefined, formData: For
 }
 
 export async function signup(_prevState: { error: string } | undefined, formData: FormData) {
+
+  const { email, password } = RegisterSchema.parse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+
+  const res = await signUp({ email, password });
+  if (!res.ok) {
+    return { error: res.error || 'Error signing up' };
+  }
+
   try {
-    const { email, password } = RegisterSchema.parse({
-      email: formData.get('email'),
-      password: formData.get('password'),
-    });
-
-    const res = await signUp({ email, password });
-
-    if (!res.ok) {
-      return { error: 'Error signing up' };
-    }
-
     await signIn('credentials', {
       email,
       password,
