@@ -27,25 +27,22 @@ import { postMessage } from '@/services/messages';
 import { z } from 'zod';
 import { generateVerificationToken } from './tokens';
 
-
 export async function authenticate(_prevState: string | undefined, formData: FormData) {
-
   const { email, password } = CreateLoginSchema.parse({
     email: formData.get('email'),
     password: formData.get('password'),
   });
   // Añado esta logica para que no deje logear si no esta verificado el email
-  const existingUser = await getUserByEmail(email)
+  const existingUser = await getUserByEmail(email);
 
   if (!existingUser || !existingUser.email || !existingUser.password) {
-    return { error: "Email does not exist!" }
+    return { error: 'Email does not exist!' };
   }
 
-
   if (!existingUser.emailVerified) {
-    const verificationToken = await generateVerificationToken(existingUser.email)
-    console.log('verifiTok: ', verificationToken)
-    return {success : "Confirmation email sent"}
+    const verificationToken = await generateVerificationToken(existingUser.email);
+    console.log('verifiTok: ', verificationToken);
+    return { success: 'Confirmation email sent' };
   }
 
   try {
@@ -56,12 +53,12 @@ export async function authenticate(_prevState: string | undefined, formData: For
     }
     if (error instanceof AuthError) {
       switch (error.type) {
-        case "CredentialsSignin":
-          return { error: "Invalid credentials." };
-        case "CallbackRouteError":
-          return { error: "Invalid credentials." };
+        case 'CredentialsSignin':
+          return { error: 'Invalid credentials.' };
+        case 'CallbackRouteError':
+          return { error: 'Invalid credentials.' };
         default:
-          return { error: "Something went wrong." };
+          return { error: 'Something went wrong.' };
       }
     }
     throw error;
@@ -69,44 +66,23 @@ export async function authenticate(_prevState: string | undefined, formData: For
 }
 
 export async function signup(_prevState: { error: string } | undefined, formData: FormData) {
-
   const { email, password } = RegisterSchema.parse({
     email: formData.get('email'),
     password: formData.get('password'),
   });
 
-  const res = await signUp({ email, password });
-  if (!res.ok) {
-    return { error: res.error || 'Error signing up' };
-  }
-
   try {
-    await signIn('credentials', {
-      email,
-      password,
-      redirectTo: '/onboarding',
-    });
+    const res = await signUp({ email, password });
+    if (!res.ok) {
+      return { error: res.error || 'Error signing up' };
+    }
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { error: error.errors };
-    }
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return { error: 'Invalid credentials.' };
-        default:
-          return { error: 'Something went wrong.' };
-      }
-    }
-    console.error(error);
-    throw error;
+    console.error('Error signing up:', error);
+    return { error: 'Error signing up' };
   }
 }
 
-export async function updateUser(
-  _prevState: { error: string; errors?: Record<string, any> } | undefined,
-  formData: FormData,
-) {
+export async function updateUser(formData: FormData) {
   try {
     const session = await auth();
     const user = session?.user;
@@ -118,10 +94,10 @@ export async function updateUser(
       };
     }
     const res = await updatedUser(newFormData as FormState);
-    await update({ ...user, userData: newFormData });
     if (!res.ok) {
       return { error: 'Error updating user' };
     }
+    await update({ ...user, userData: newFormData });
   } catch (error) {
     console.error('Error updating user:', error);
     return { error: 'Error updating user' };

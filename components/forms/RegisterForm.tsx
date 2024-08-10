@@ -22,7 +22,7 @@ export default function RegisterForm() {
         setError(true)
       }
     } else {
-      toast.success('Account Created!')
+      toast.success('Account Created! Please check your email to confirm your account.')
       setError(false)
     }
   }

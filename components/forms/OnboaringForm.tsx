@@ -1,38 +1,27 @@
-"use client";
-import GenderSelect from "@/components/forms/GenderSelected";
-import InterestSelected from "@/components/forms/InterestSelected";
-import { updateUser } from "@/lib/actions";
-import { dob_day_values, dob_month_values } from "@/lib/data";
-import { FormState } from "@/types/onboarding";
-import toast from "react-hot-toast";
-import { CustomButton } from "../buttons/CustomButton";
-import CustomDropDowns from "../customComponents/CustomDropDown";
-import CustomInput from "../customComponents/CustomInput";
-import CustomPhotoUploader from "../customComponents/CustomPhotoUploader";
-import CustomTextArea from "../customComponents/CustomTextArea";
-import { useFormState } from "react-dom";
+'use client';
+import GenderSelect from '@/components/forms/GenderSelected';
+import InterestSelected from '@/components/forms/InterestSelected';
+import { updateUser } from '@/lib/actions';
+import { dob_day_values, dob_month_values } from '@/lib/data';
+import { FormState } from '@/types/onboarding';
+import toast from 'react-hot-toast';
+import { CustomButton } from '../buttons/CustomButton';
+import CustomDropDowns from '../customComponents/CustomDropDown';
+import CustomInput from '../customComponents/CustomInput';
+import CustomPhotoUploader from '../customComponents/CustomPhotoUploader';
+import CustomTextArea from '../customComponents/CustomTextArea';
 
-const handleOnboardingForm = async (
-  dispatch: (formData: FormData) => void,
-  formData: FormData,
-) => {
-  return new Promise((resolve) => {
-    dispatch(formData);
-    resolve(true);
-  });
-};
 
 export default function OnboardingForm({ user }: { user?: FormState }) {
-  const [state, dispatch] = useFormState(updateUser, undefined);
 
   const handleForm = async (formData: FormData) => {
-    await handleOnboardingForm(dispatch, formData);
-    if (state?.error) {
+    const res = await updateUser(formData);
+    if (res?.error) {
       toast.dismiss();
-      toast.error(state.error);
+      toast.error(res.error);
     } else {
       toast.dismiss();
-      toast.success("Profile updated!");
+      toast.success('Profile updated!');
     }
   };
 
@@ -48,7 +37,7 @@ export default function OnboardingForm({ user }: { user?: FormState }) {
             type="text"
             initialValue={user?.name}
           />
-          <div className="grid grid-cols-3 gap-2 my-3">
+          <div className="my-3 grid grid-cols-3 gap-2">
             <div className="col-span-3 lg:col-span-1">
               <CustomDropDowns
                 name="dob_day"
@@ -89,7 +78,7 @@ export default function OnboardingForm({ user }: { user?: FormState }) {
             <label>Show Me</label>
             <InterestSelected initialValue={user?.previas_interest} />
           </div>
-          <div className="flex items-center text-secondary gap-3 my-2">
+          <div className="my-2 flex items-center gap-3 text-secondary">
             <CustomDropDowns
               name="show_interest"
               label="Show interest"
@@ -119,16 +108,12 @@ export default function OnboardingForm({ user }: { user?: FormState }) {
           </div>
         </div>
         <div className="col-span-3 lg:col-span-1">
-          <div className="flex flex-wrap justify-center items-center gap-2">
-            <CustomPhotoUploader
-              label="Upload photo"
-              name="url_img"
-              initialValue={user?.url_img}
-            />
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <CustomPhotoUploader label="Upload photo" name="url_img" initialValue={user?.url_img} />
           </div>
         </div>
       </div>
-      <div className="flex justify-center mt-4">
+      <div className="mt-4 flex justify-center">
         <CustomButton text="Save" />
       </div>
     </form>
