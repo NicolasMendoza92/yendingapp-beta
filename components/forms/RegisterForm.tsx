@@ -22,7 +22,7 @@ export default function RegisterForm() {
         setError(true)
       }
     } else {
-      toast.success('Profile updated!')
+      toast.success('Account Created!')
       setError(false)
     }
   }
