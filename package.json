@@ -10,7 +10,8 @@
     "postinstall": "prisma generate",
     "serve": "serve -s .next",
     "capacitor:sync": "npx cap sync",
-    "ios": "npm run build && npm run capacitor:sync && npx cap open ios"
+    "ios": "npm run build && npm run capacitor:sync && npx cap open ios",
+    "android": "npm run build && npm run capacitor:sync && npx cap open android"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.4.1",
