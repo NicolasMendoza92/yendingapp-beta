@@ -26,6 +26,9 @@ import { FormState, ValidatedErrors } from '@/types/onboarding';
 import { postMessage } from '@/services/messages';
 import { z } from 'zod';
 import { generateVerificationToken } from './tokens';
+import { getVerificationTokenByToken } from './verification-token';
+import { prisma } from '@/auth.config';
+import { sendVerificationEmail } from './mail';
 
 export async function authenticate(_prevState: string | undefined, formData: FormData) {
   const { email, password } = CreateLoginSchema.parse({
@@ -42,7 +45,13 @@ export async function authenticate(_prevState: string | undefined, formData: For
   if (!existingUser.emailVerified) {
     const verificationToken = await generateVerificationToken(existingUser.email);
     console.log('verifiTok: ', verificationToken);
-    return { success: 'Confirmation email sent' };
+
+    await sendVerificationEmail(
+      verificationToken.email,
+      verificationToken.token
+    )
+
+    return { success: 'Confirmation email sent, please validate' };
   }
 
   try {
@@ -82,7 +91,49 @@ export async function signup(_prevState: { error: string } | undefined, formData
   }
 }
 
+export const newVerification = async (token: string) => {
+  const existingToken = await getVerificationTokenByToken(token);
+
+  if (!existingToken) {
+    return { error: "Token does not exist!" }
+  }
+
+  const hasExpired = new Date(existingToken.expires) < new Date();
+
+  if (hasExpired) {
+    return { error: "Token has expired!" }
+  }
+
+  const existingUser = await getUserByEmail(existingToken.email);
+
+  if (!existingUser) {
+    return { error: "Email does not exist in our db" }
+  }
+
+  // Una vez que el usuario verifica, hago el update en la db
+  try {
+    await prisma.user.update({
+      where: { id: existingUser.id },
+      data: {
+        emailVerified: new Date(),
+        email: existingToken.email
+      }
+    })
+
+    //   si va todo bien, elimina el token de la db.
+    await prisma.verificationToken.delete({
+      where: { id: existingToken.id }
+    })
+
+    return { success: "Email verified successfully" }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
 export async function updateUser(formData: FormData) {
+  
   try {
     const session = await auth();
     const user = session?.user;

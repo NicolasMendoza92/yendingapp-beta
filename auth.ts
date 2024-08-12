@@ -5,6 +5,7 @@ import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { getUserById } from './services/users';
 
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -13,10 +14,10 @@ export const {
   unstable_update: update,
 } = NextAuth({
   ...authConfig,
-  // Esto es para que cuando se verifique el email, actualice el emailVerified.
+  // Esto es para que cuando se verifique el email, nextauth actualice el emailVerified.
   events: {
     async linkAccount({ user }) {
-       const userToUpdate = await prisma.user.update({
+      const userToUpdate = await prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: new Date() }
       })
@@ -35,7 +36,7 @@ export const {
       return token;
     },
     async session({ session, token }) {
-
+      
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
@@ -45,10 +46,6 @@ export const {
       return session;
     },
     async signIn({ user, account }) {
-      console.log({
-        user, 
-        account,
-      })
       // si hace login con google no hace falta verificar email
       if (account?.provider !== "credentials") return true;
 
@@ -59,15 +56,13 @@ export const {
       }
 
       try {
-        
         const existingUser = await getUserById(user.id);
-        console.log("email veri: ",existingUser?.emailVerified)
         // evito el sing in sin email verification 
         if (!existingUser?.emailVerified) return false;
 
+        return true
         // TODO: Add 2factor auth 
 
-        return true
       } catch (error) {
         console.error("Error during signIn callback:", error);
         return false;

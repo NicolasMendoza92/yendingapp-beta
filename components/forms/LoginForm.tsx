@@ -11,6 +11,7 @@ export default function LoginForm() {
 
   const handleLogin = async (formData: FormData) => {
     const res = await authenticate(undefined, formData);
+
     toast.dismiss()
     if (res?.error) {
       if (Array.isArray(res.error)) {
@@ -23,7 +24,7 @@ export default function LoginForm() {
         setError(true)
       }
     } else {
-      toast.success('Profile updated!')
+      toast.success((res?.success || "Operation successfully"))
       setError(false)
     }
   }

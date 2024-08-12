@@ -5,8 +5,8 @@ export default auth((req) => {
   const isLoggedIn = !!auth;
   const hasUserId = auth?.user?.userData?.user_id;
   const hasUserName = auth?.user?.userData?.name;
-  const publicRoutes = ['/', '/auth/new-verification'];
-  const authRoutes = ['/auth/login', '/auth/register', '/onboarding'];
+  const publicRoutes = ['/'];
+  const authRoutes = ['/auth/login', '/auth/register'];
   const isApiURL = nextUrl.pathname.startsWith('/api');
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
@@ -15,8 +15,9 @@ export default auth((req) => {
     return;
   }
 
+
   if (isAuthRoute) {
-    // Logica para el singIn con google provider
+
     if (isLoggedIn && (!hasUserId || !hasUserName)) {
       return Response.redirect(new URL('/onboarding', nextUrl));
     }

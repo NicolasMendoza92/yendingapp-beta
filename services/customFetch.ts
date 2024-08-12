@@ -17,8 +17,7 @@ async function customFetch({
   body
 }: CustomFetchProps) {
   const session = await auth()
-  console.log('sesion customfetch', session)
-
+  console.log('session customfeth:', session)
   const headers = new Headers()
   headers.append('Content-Type', 'application/json')
   if (withCredentials) {
