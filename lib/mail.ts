@@ -23,3 +23,32 @@ export const sendVerificationEmail = async (
     })
 
 }
+
+
+export const sendPasswordResetEmail = async (
+    email: string,
+    token: string
+) => {
+    // Cambiar para el deploy despues
+    const resetLink = `http://localhost:3000/auth/new-password?token=${token}`;
+
+    await resend.emails.send({
+        from: "Yending App <onboarding@resend.dev>",
+        to: email,
+        subject: "Reset your password",
+        html: `<p> Click <a href="${resetLink}">here</a> to reset your password.</p>`
+    })
+
+}
+
+export const sendTwoFactorTokenEmail = async (
+    email: string,
+    token: string
+) => {
+    await resend.emails.send({
+        from: "Yending App <onboarding@resend.dev>",
+        to: email,
+        subject: "2FA Code",
+        html: `<p> Your 2FA Code: ${token} </p>`
+    })
+}

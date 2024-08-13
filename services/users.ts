@@ -1,6 +1,7 @@
 import { FormState } from '@/types/onboarding'
 import customFetch from './customFetch'
 import { prisma } from '@/auth.config'
+import bcrypt from 'bcryptjs';
 
 type SignUp = {
   email: string
@@ -104,5 +105,27 @@ export const getUserById = async (id: string) => {
     return user
   } catch {
     return null
+  }
+}
+
+export const updatePassword = async (existingUserId: string, newPassword: string, existingTokenId: string) => {
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+  try {
+    await prisma.user.update({
+      where: { id: existingUserId },
+      data: { password: hashedPassword }
+    })
+
+    await prisma.passwordResetToken.delete(
+      {
+        where: { id: existingTokenId }
+      }
+    )
+
+    return {success: "Password updated"}
+  } catch (error) {
+    return {error: "failed to change password"}
   }
 }

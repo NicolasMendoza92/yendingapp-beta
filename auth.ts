@@ -4,7 +4,7 @@ import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { getUserById } from './services/users';
-
+import { getTwoFactorConfirmationByUserId } from './lib/two-factor-confirmation';
 
 export const {
   handlers: { GET, POST },
@@ -36,7 +36,7 @@ export const {
       return token;
     },
     async session({ session, token }) {
-      
+
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
@@ -46,9 +46,9 @@ export const {
       return session;
     },
     async signIn({ user, account }) {
+      console.log(user)
       // si hace login con google no hace falta verificar email
       if (account?.provider !== "credentials") return true;
-
       // añado esto por un error verga de ts 
       if (!user.id) {
         console.error("user Id is missing")
@@ -58,10 +58,26 @@ export const {
       try {
         const existingUser = await getUserById(user.id);
         // evito el sing in sin email verification 
-        if (!existingUser?.emailVerified) return false;
+        if (!existingUser?.emailVerified) {
+          console.error("Email not verified.");
+          return false;
+        }
+
+        // Add logic to 2FA
+        if (existingUser.isTwoFactorEnabled) {
+          const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
+
+          if (!twoFactorConfirmation) {
+            console.error("Two-factor authentication not confirmed.");
+            return false;
+          }
+          // delete 2fa for next sign in
+          await prisma.twoFactorConfirmation.delete({
+            where: { id: twoFactorConfirmation.id }
+          })
+        }
 
         return true
-        // TODO: Add 2factor auth 
 
       } catch (error) {
         console.error("Error during signIn callback:", error);
@@ -78,14 +94,18 @@ export const {
           password: string;
         };
         const user = await prisma.user.findUnique({ where: { email: email } });
-        if (user) {
-          const passwordMatch = await bcrypt.compare(password, user.password || '');
-          if (!passwordMatch) {
-            return null;
-          }
-          return user;
+        if (!user) {
+          console.error("No user found with this email.");
+          return null;
         }
-        return null;
+
+        const passwordMatch = await bcrypt.compare(password, user.password || '');
+        if (!passwordMatch) {
+          console.error("Password does not match.");
+          return null;
+        }
+
+        return user;
       },
     }),
     Google({

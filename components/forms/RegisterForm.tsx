@@ -13,10 +13,10 @@ export default function RegisterForm() {
     toast.dismiss()
     if (res?.error) {
       if (Array.isArray(res.error)) {
-        res.error.forEach((err: { message: string }) => {
-          toast.error(err.message)
-          setError(true)
-        })
+        res.error.forEach((err) => {
+          toast.error(err.message);
+          setError(true);
+        });
       } else {
         toast.error(res.error)
         setError(true)

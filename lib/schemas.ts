@@ -30,7 +30,8 @@ export const CreateLoginSchema = z.object({
   }),
   password: z.string().min(1, {
     message: "Password is required"
-  })
+  }),
+  twoFacCode: z.optional(z.string())
 })
 
 // Schema for Register form 
@@ -41,6 +42,18 @@ export const RegisterSchema = z.object({
   password: z.string().min(6,{
     message:"Minimun 6 characters required"
   })
+})
+
+export const ResetSchema = z.object({
+  email: z.string().email({
+    message: "Email is required"
+  }),
+})
+
+export const NewPasswordSchema = z.object({
+  password: z.string().min(6,{
+    message:"Minimun 6 characters required"
+  }),
 })
 
 export const CreatePreviaSchema = z.object({

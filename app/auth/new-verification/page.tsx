@@ -56,7 +56,7 @@ const NewVerificationPage = () => {
                             <BeatLoader />
                         </div>
                     )}
-                    {!success && (
+                    {/* {!success && (
                         <div className='bg-red-200 border border-red-500 rounded-md text-center p-2 my-2'>
                             {error}
                         </div>
@@ -65,7 +65,7 @@ const NewVerificationPage = () => {
                         <div className='bg-green-200 border border-green-500 rounded-md  text-center p-2 my-2'>
                             {success}
                         </div>
-                    )}
+                    )} */}
 
                     <div className="text-center">
                         Click

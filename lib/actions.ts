@@ -10,7 +10,7 @@ import {
   putJoinRequest,
   putPrevia,
 } from '@/services/previas';
-import { getUserByEmail, signUp, updatedUser } from '@/services/users';
+import { getUserByEmail, signUp, updatedUser, updatePassword } from '@/services/users';
 import type { UpdateJoinRequest } from '@/types/data';
 import { AuthError } from 'next-auth';
 import { revalidatePath } from 'next/cache';
@@ -19,24 +19,45 @@ import {
   CreateLoginSchema,
   CreatePreviaFromSchema,
   CreateRequestJoinSchema,
+  NewPasswordSchema,
   RegisterSchema,
+  ResetSchema,
   UpdatePreviaFromSchema,
 } from './schemas';
 import { FormState, ValidatedErrors } from '@/types/onboarding';
 import { postMessage } from '@/services/messages';
 import { z } from 'zod';
-import { generateVerificationToken } from './tokens';
+import { generatePasswordResetToken, generateVerificationToken, generateTwoFactorToken } from './tokens';
 import { getVerificationTokenByToken } from './verification-token';
 import { prisma } from '@/auth.config';
-import { sendVerificationEmail } from './mail';
+import { sendPasswordResetEmail, sendVerificationEmail, sendTwoFactorTokenEmail } from './mail';
+import { getPasswordResetTokenByToken } from './password-reset-token';
+import { getTwoFactorTokenByEmail } from './two-factor-token';
+import { getTwoFactorConfirmationByUserId } from './two-factor-confirmation';
+
 
 export async function authenticate(_prevState: string | undefined, formData: FormData) {
-  const { email, password } = CreateLoginSchema.parse({
-    email: formData.get('email'),
-    password: formData.get('password'),
-  });
-  // Añado esta logica para que no deje logear si no esta verificado el email
-  const existingUser = await getUserByEmail(email);
+
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const twoFacCode = formData.get('code') as string;
+
+  if (!email || !password) {
+    return { error: 'Email and password are required!' };
+  }
+
+  const dataToValidate: { email: string; password: string; twoFacCode?: string } = {
+    email: email,
+    password: password,
+  };
+
+  if (twoFacCode) {
+    dataToValidate.twoFacCode = twoFacCode;
+  }
+  // Ahora valido los datos
+  const parsedData = CreateLoginSchema.parse(dataToValidate);
+
+  const existingUser = await getUserByEmail(parsedData.email);
 
   if (!existingUser || !existingUser.email || !existingUser.password) {
     return { error: 'Email does not exist!' };
@@ -54,8 +75,60 @@ export async function authenticate(_prevState: string | undefined, formData: For
     return { success: 'Confirmation email sent, please validate' };
   }
 
+  // Logica si el usuario tiene habilitado el 2FCode
+  if (existingUser.isTwoFactorEnabled && existingUser.email) {
+
+    if (parsedData.twoFacCode) {
+
+      const twoFactorToken = await getTwoFactorTokenByEmail(existingUser.email);
+
+      if (!twoFactorToken) {
+        return { error: "Invalid code" }
+      }
+      if (twoFactorToken.token !== parsedData.twoFacCode) {
+        return { error: "Invalid code" }
+      }
+
+      const hasExpired = new Date(twoFactorToken.expires) < new Date();
+
+      if (hasExpired) {
+        return { error: "Code expired" }
+      }
+
+      // Manejo la db eliminando lo que ya no necesito
+      await prisma.twoFactorToken.delete({
+        where: { id: twoFactorToken.id }
+      });
+
+      const existingConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id)
+
+      if (existingConfirmation) {
+        await prisma.twoFactorConfirmation.delete(
+          { where: { id: existingConfirmation.id } }
+        )
+      }
+
+      await prisma.twoFactorConfirmation.create({
+        data: {
+          userId: existingUser.id,
+        }
+      });
+    } else {
+      const twoFactorToken = await generateTwoFactorToken(existingUser.email);
+      console.log('2FATok: ', twoFactorToken);
+
+      await sendTwoFactorTokenEmail(
+        twoFactorToken.email,
+        twoFactorToken.token
+      )
+      return { twoFactor: true };
+    }
+
+
+  }
+
   try {
-    await signIn('credentials', { email, password, redirectTo: '/dashboard' });
+    await signIn('credentials', { email: parsedData.email, password: parsedData.password, redirectTo: '/dashboard' });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors };
@@ -74,6 +147,7 @@ export async function authenticate(_prevState: string | undefined, formData: For
   }
 }
 
+// Logica para register
 export async function signup(_prevState: { error: string } | undefined, formData: FormData) {
   const { email, password } = RegisterSchema.parse({
     email: formData.get('email'),
@@ -81,13 +155,22 @@ export async function signup(_prevState: { error: string } | undefined, formData
   });
 
   try {
-    const res = await signUp({ email, password });
-    if (!res.ok) {
-      return { error: res.error || 'Error signing up' };
-    }
+    await signUp({ email, password });
   } catch (error) {
-    console.error('Error signing up:', error);
-    return { error: 'Error signing up' };
+    if (error instanceof z.ZodError) {
+      return { error: error.message };
+    }
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return { error: 'Invalid credentials.' };
+        case 'CallbackRouteError':
+          return { error: 'Invalid credentials.' };
+        default:
+          return { error: 'Something went wrong.' };
+      }
+    }
+    throw error;
   }
 }
 
@@ -107,7 +190,7 @@ export const newVerification = async (token: string) => {
   const existingUser = await getUserByEmail(existingToken.email);
 
   if (!existingUser) {
-    return { error: "Email does not exist in our db" }
+    return { error: "Email does not exist!" }
   }
 
   // Una vez que el usuario verifica, hago el update en la db
@@ -131,9 +214,65 @@ export const newVerification = async (token: string) => {
   }
 }
 
+export async function passwordResetEmail(_prevState: string | undefined, formData: FormData) {
+  const { email } = ResetSchema.parse({
+    email: formData.get('email'),
+  });
+  const existingUser = await getUserByEmail(email);
+  if (!existingUser) {
+    return { error: "Email not found!" }
+  }
+
+  const passwordResetToken = await generatePasswordResetToken(email);
+
+  await sendPasswordResetEmail(
+    passwordResetToken.email,
+    passwordResetToken.token
+  )
+}
+
+
+export async function newPassword(formData: FormData, token: string | null) {
+
+  if (!token) {
+    return { error: "Missing Token" }
+  }
+
+  const { password } = NewPasswordSchema.parse({
+    password: formData.get('password'),
+  });
+
+  // Buscamos el token en nuestra db
+  const existingToken = await getPasswordResetTokenByToken(token);
+  if (!existingToken) {
+    return { error: "Invalid token" }
+  }
+
+  const hasExpired = new Date(existingToken.expires) < new Date();
+
+  if (hasExpired) {
+    return { error: "Token has expired!" }
+  }
+
+  const existingUser = await getUserByEmail(existingToken.email);
+  if (!existingUser) {
+    return { error: "Email does not exists!" }
+  }
+
+  try {
+    // Llamo a la funcion para actualizar la contraseña.
+    await updatePassword(existingUser.id, password, existingToken.id);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: error.message };
+    }
+  }
+
+}
+
 
 export async function updateUser(formData: FormData) {
-  
+
   try {
     const session = await auth();
     const user = session?.user;

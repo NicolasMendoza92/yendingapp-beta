@@ -51,30 +51,32 @@ enum UserRole {
 }
 
 model User {
-  id               String    @id @default(auto()) @map("_id") @db.ObjectId
-  v                Int?      @map("__v")
-  about            String?
-  age              Int?
-  createdAt        DateTime? @db.Date
-  dob_day          String?
-  dob_month        String?
-  dob_year         String?
-  email            String    @unique(map: "email_1")
-  emailVerified    DateTime?
-  gender_identity  String?
-  image            String?
-  name             String?
-  password         String?
-  previas_created  String[]
-  previas_interest String?
-  previas_requests String[]
-  show_interest    Boolean?
-  updatedAt        DateTime  @updatedAt @db.Date
-  url_img          String?
-  user_id          String?   @unique(map: "user_id_1")
-  role             UserRole  @default(USER)
-  Account          Account[]
-  Session          Session[]
+  id                    String                 @id @default(auto()) @map("_id") @db.ObjectId
+  v                     Int?                   @map("__v")
+  about                 String?
+  age                   Int?
+  createdAt             DateTime?              @db.Date
+  dob_day               String?
+  dob_month             String?
+  dob_year              String?
+  email                 String                 @unique(map: "email_1")
+  emailVerified         DateTime?
+  gender_identity       String?
+  image                 String?
+  name                  String?
+  password              String?
+  previas_created       String[]
+  previas_interest      String?
+  previas_requests      String[]
+  show_interest         Boolean?
+  updatedAt             DateTime               @updatedAt @db.Date
+  url_img               String?
+  user_id               String?                @unique(map: "user_id_1")
+  role                  UserRole               @default(USER)
+  Account               Account[]
+  Session               Session[]
+  TwoFactorConfirmation TwoFactorConfirmation?
+  isTwoFactorEnabled    Boolean                @default(false)
 
   @@map("users")
 }
@@ -146,4 +148,30 @@ model VerificationToken {
   expires DateTime
 
   @@unique([email, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorToken {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorConfirmation {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
 }
