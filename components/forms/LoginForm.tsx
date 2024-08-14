@@ -6,9 +6,8 @@ import { authenticate } from '@/lib/actions'
 import { useState } from 'react';
 import Link from 'next/link';
 
-
 export default function LoginForm() {
-  const [error, setError] = useState(false);
+
   const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [formValues, setFormValues] = useState({ email: '', password: '' });
 
@@ -30,23 +29,19 @@ export default function LoginForm() {
 
     const res = await authenticate(undefined, formData);
 
-    toast.dismiss()
+    toast.dismiss();
+
     if (res?.error) {
-      if (Array.isArray(res.error)) {
-        res.error.forEach((err) => {
-          toast.error(err.message);
-          setError(true);
-        });
-      }
-    }
-    if (res?.success) {
-      toast.success((res?.success || "Operation successfully"))
-      setError(false)
-    }
-    if (res?.twoFactor) {
-      setShowTwoFactor(true)
-      toast.success("Verification code sent, please check your email")
-    }
+    const errors = Array.isArray(res.error) ? res.error : [{ message: res.error }];
+    errors.forEach((err) => {
+      toast.error(err.message);
+    });
+  } else if (res?.success) {
+    toast.success(res.success || "Operation successful");
+  } else if (res?.twoFactor) {
+    setShowTwoFactor(true);
+    toast.success("Verification code sent, please check your email");
+  }
 
   }
 
@@ -57,14 +52,14 @@ export default function LoginForm() {
           <>
             <label className='text-primary font-bold'>Email</label>
             <input
-              className={error ? 'border-red-500 text-white' : 'border-primary'}
+              className={'border-primary'}
               type="email"
               name="email"
 
             />
             <label className='text-primary font-bold'>Password</label>
             <input
-              className={error ? 'border-red-500 text-white' : 'border-primary'}
+              className={'border-primary'}
               type="password"
               name="password"
             />

@@ -100,3 +100,10 @@ export const dob_month_values = [
       label: 'Flirting and casual encounters'
     }
   ]
+
+  export const roles_values = [
+    { value: 'USER', label: 'USER' },
+    { value: 'BAR', label: 'BAR' },
+    { value: 'DISCO', label: 'DISCO' },
+    { value: 'MEETING POINT', label: 'MEETING POINT' },
+  ]

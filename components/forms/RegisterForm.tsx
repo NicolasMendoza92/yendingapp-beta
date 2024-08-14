@@ -3,27 +3,20 @@ import { signup } from '@/lib/actions'
 import { Link } from 'next-view-transitions'
 import toast from 'react-hot-toast'
 import { CustomButton } from '../buttons/CustomButton'
-import { useState } from 'react'
+
 
 export default function RegisterForm() {
-  const [error, setError] = useState(false);
 
   const handleForm = async (formData: FormData) => {
     const res = await signup(undefined, formData)
     toast.dismiss()
     if (res?.error) {
-      if (Array.isArray(res.error)) {
-        res.error.forEach((err) => {
-          toast.error(err.message);
-          setError(true);
-        });
-      } else {
-        toast.error(res.error)
-        setError(true)
-      }
+      const errors = Array.isArray(res.error) ? res.error : [{ message: res.error }];
+      errors.forEach((err: { message: string }) => {
+        toast.error(err.message);
+      });
     } else {
-      toast.success('Account Created! Please check your email to confirm your account.')
-      setError(false)
+      toast.success('Account Created! Please check your email to confirm your account.');
     }
   }
 
@@ -34,14 +27,12 @@ export default function RegisterForm() {
         type="email"
         name="email"
         color="white"
-        className={error ? 'border-red-500 text-white' : ''}
       />
       <label>Choose your password</label>
       <input
         type="password"
         name="password"
         color="white"
-        className={error ? 'border-red-500 text-white' : ''}
       />
       <CustomButton text="Register" />
       <Link className="text-sm mt-3" href={'/auth/login'} scroll={false}>

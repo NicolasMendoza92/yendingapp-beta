@@ -11,10 +11,10 @@ import CustomInput from '../customComponents/CustomInput';
 import CustomPhotoUploader from '../customComponents/CustomPhotoUploader';
 import CustomTextArea from '../customComponents/CustomTextArea';
 
-
 export default function OnboardingForm({ user }: { user?: FormState }) {
 
   const handleForm = async (formData: FormData) => {
+
     const res = await updateUser(formData);
     if (res?.error) {
       toast.dismiss();

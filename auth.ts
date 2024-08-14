@@ -96,13 +96,13 @@ export const {
         const user = await prisma.user.findUnique({ where: { email: email } });
         if (!user) {
           console.error("No user found with this email.");
-          return null;
+          throw new Error('No user found with this email.');
         }
 
         const passwordMatch = await bcrypt.compare(password, user.password || '');
         if (!passwordMatch) {
           console.error("Password does not match.");
-          return null;
+          throw new Error('Password does not match.');
         }
 
         return user;

@@ -39,8 +39,8 @@ export const RegisterSchema = z.object({
   email: z.string().email({
     message: "Email is required"
   }),
-  password: z.string().min(6,{
-    message:"Minimun 6 characters required"
+  password: z.string().min(6, {
+    message: "Minimun 6 characters required in password"
   })
 })
 
@@ -51,10 +51,11 @@ export const ResetSchema = z.object({
 })
 
 export const NewPasswordSchema = z.object({
-  password: z.string().min(6,{
-    message:"Minimun 6 characters required"
+  password: z.string().min(6, {
+    message: "Minimun 6 characters required"
   }),
 })
+
 
 export const CreatePreviaSchema = z.object({
   creator: z.string(),
@@ -81,7 +82,7 @@ export const CreatePreviaSchema = z.object({
   updatedAt: z.string(),
   lat: z.string().optional(),
   lng: z.string().optional()
-  
+
 })
 
 export const CreatePreviaFromSchema = CreatePreviaSchema.omit({

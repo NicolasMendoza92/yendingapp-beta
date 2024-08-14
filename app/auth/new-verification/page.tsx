@@ -49,7 +49,7 @@ const NewVerificationPage = () => {
                         Confirming your verification
                     </h1>
                     <p className="mb-6 text-center text-primary">
-                        Complete the process to start enjoying
+                        {success || error ? "Email verified, go to login" : "Complete the process to start enjoying"}
                     </p>
                     {!success && !error && (
                         <div className='text-center'>

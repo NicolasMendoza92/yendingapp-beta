@@ -123,12 +123,14 @@ export async function authenticate(_prevState: string | undefined, formData: For
       )
       return { twoFactor: true };
     }
-
-
   }
 
   try {
-    await signIn('credentials', { email: parsedData.email, password: parsedData.password, redirectTo: '/dashboard' });
+    await signIn('credentials', {
+      email: parsedData.email,
+      password: parsedData.password,
+      redirectTo: '/dashboard'
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors };
@@ -136,41 +138,45 @@ export async function authenticate(_prevState: string | undefined, formData: For
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          return { error: 'Invalid credentials.' };
+          return { error: [{ message: 'Invalid credentials.' }] };
         case 'CallbackRouteError':
-          return { error: 'Invalid credentials.' };
+          return { error: [{ message: 'Invalid credentials.' }] };
         default:
-          return { error: 'Something went wrong.' };
+          return { error: [{ message: 'Something went wrong.' }] };
       }
     }
-    throw error;
+    throw error
   }
 }
 
 // Logica para register
 export async function signup(_prevState: { error: string } | undefined, formData: FormData) {
+  try {
   const { email, password } = RegisterSchema.parse({
     email: formData.get('email'),
     password: formData.get('password'),
   });
 
-  try {
-    await signUp({ email, password });
+    const res = await signUp({ email, password });
+    if (!res.ok) {
+      return { error: res.error };
+    }
+    return { success: 'Account created successfully!' };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { error: error.message };
+      return { error: error.errors.map((err) => ({ message: err.message })) };
     }
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          return { error: 'Invalid credentials.' };
+          return { error: [{ message: 'Invalid credentials.' }] };
         case 'CallbackRouteError':
-          return { error: 'Invalid credentials.' };
+          return { error: [{ message: 'Invalid credentials.' }] };
         default:
-          return { error: 'Something went wrong.' };
+          return { error: [{ message: 'Something went wrong.' }] };
       }
     }
-    throw error;
+    throw error
   }
 }
 
@@ -269,7 +275,6 @@ export async function newPassword(formData: FormData, token: string | null) {
   }
 
 }
-
 
 export async function updateUser(formData: FormData) {
 

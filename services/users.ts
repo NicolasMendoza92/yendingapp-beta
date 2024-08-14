@@ -16,19 +16,16 @@ export const signUp = async ({ email, password }: SignUp) => {
       withCredentials: false,
       body: { email, password }
     })
-    if (!response.ok) {
-      const errorData = await response.json();
-      return { ok: false, error: errorData.message };
-    }
-
-    // return { ok: true };
-
     const responseData = await response.json();
 
-    return { ok: true, message: responseData.message, awaitingConfirmation: true };
+    if (!response.ok) {
+       return { error: responseData.message };
+    }
+
+    return responseData;
   } catch (error) {
     console.error(error);
-    throw new Error('Error en el registro.');
+    return { error: [{ message: 'Error en el registro.' }] };
   }
 }
 
