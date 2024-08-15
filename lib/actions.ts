@@ -9,21 +9,12 @@ import {
   postRequestJoin,
   putJoinRequest,
   putPrevia,
-<<<<<<< HEAD
 } from '@/services/previas';
 import { getUserByEmail, signUp, updatedUser, updatePassword } from '@/services/users';
 import type { UpdateJoinRequest } from '@/types/data';
 import { AuthError } from 'next-auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-=======
-} from '@/services/previas'
-import { signUp, updatedUser } from '@/services/users'
-import type { UpdateJoinRequest } from '@/types/data'
-import { AuthError } from 'next-auth'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
->>>>>>> 1f12eed82a798ef1c3d7d5151521c8476cc74c89
 import {
   CreateLoginSchema,
   CreatePreviaFromSchema,
@@ -32,7 +23,6 @@ import {
   RegisterSchema,
   ResetSchema,
   UpdatePreviaFromSchema,
-<<<<<<< HEAD
 } from './schemas';
 import { FormState, ValidatedErrors } from '@/types/onboarding';
 import { postMessage } from '@/services/messages';
@@ -141,20 +131,6 @@ export async function authenticate(_prevState: string | undefined, formData: For
       password: parsedData.password,
       redirect: false
     });
-=======
-} from './schemas'
-import { FormState, ValidatedErrors } from '@/types/onboarding'
-import { postMessage } from '@/services/messages'
-
-export async function authenticate(_prevState: string | undefined, formData: FormData) {
-  try {
-    const { email, password } = CreateLoginSchema.parse({
-      email: formData.get('email'),
-      password: formData.get('password'),
-    })
-
-    await signIn('credentials', { email, password, redirect: false })
->>>>>>> 1f12eed82a798ef1c3d7d5151521c8476cc74c89
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors };
@@ -162,17 +138,11 @@ export async function authenticate(_prevState: string | undefined, formData: For
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-<<<<<<< HEAD
           return { error: [{ message: 'Invalid credentials.' }] };
         case 'CallbackRouteError':
           return { error: [{ message: 'Invalid credentials.' }] };
         default:
           return { error: [{ message: 'Something went wrong.' }] };
-=======
-          return 'Invalid credentials.'
-        default:
-          return 'Something went wrong.'
->>>>>>> 1f12eed82a798ef1c3d7d5151521c8476cc74c89
       }
     }
     throw error
@@ -182,7 +152,6 @@ export async function authenticate(_prevState: string | undefined, formData: For
 // Logica para register
 export async function signup(_prevState: { error: string } | undefined, formData: FormData) {
   try {
-<<<<<<< HEAD
   const { email, password } = RegisterSchema.parse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -193,24 +162,6 @@ export async function signup(_prevState: { error: string } | undefined, formData
       return { error: res.error };
     }
     return { success: 'Account created successfully!' };
-=======
-    const { email, password } = CreateLoginSchema.parse({
-      email: formData.get('email'),
-      password: formData.get('password'),
-    })
-
-    const res = await signUp({ email, password })
-
-    if (!res.ok) {
-      return { error: 'Error signing up' }
-    }
-
-    await signIn('credentials', {
-      email,
-      password,
-      redirectTo: '/onboarding',
-    })
->>>>>>> 1f12eed82a798ef1c3d7d5151521c8476cc74c89
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors.map((err) => ({ message: err.message })) };
@@ -218,7 +169,6 @@ export async function signup(_prevState: { error: string } | undefined, formData
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-<<<<<<< HEAD
           return { error: [{ message: 'Invalid credentials.' }] };
         case 'CallbackRouteError':
           return { error: [{ message: 'Invalid credentials.' }] };
@@ -226,14 +176,6 @@ export async function signup(_prevState: { error: string } | undefined, formData
           return { error: [{ message: 'Something went wrong.' }] };
       }
     }
-=======
-          return { error: 'Invalid credentials.' }
-        default:
-          return { error: 'Something went wrong.' }
-      }
-    }
-    console.error(error)
->>>>>>> 1f12eed82a798ef1c3d7d5151521c8476cc74c89
     throw error
   }
 }
@@ -346,16 +288,9 @@ export async function updateUser(formData: FormData) {
         errors: (newFormData as ValidatedErrors).errors,
       }
     }
-<<<<<<< HEAD
-    const res = await updatedUser(newFormData as FormState);
-    console.log(res)
-    if (!res.ok) {
-      return { error: 'Error updating user' };
-=======
     const res = await updatedUser(newFormData as FormState)
     if (!res) {
       return { error: 'Error updating user' }
->>>>>>> 1f12eed82a798ef1c3d7d5151521c8476cc74c89
     }
 
     const updatedData = { ...user.userData , ...res.updatedUser }
