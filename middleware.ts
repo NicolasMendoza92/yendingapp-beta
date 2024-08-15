@@ -11,13 +11,13 @@ export default auth((req) => {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isOnboarding = nextUrl.pathname === "/onboarding"
-  
+ 
   if (isApiURL) {
     return;
   }
 
   // Ruta para luego de validar email 
-  if (isLoggedIn && isOnboarding === false && hasUserName === null) {
+  if (isLoggedIn && isOnboarding === false && !hasUserName) {
     return Response.redirect(new URL('/onboarding', nextUrl))
   }
 

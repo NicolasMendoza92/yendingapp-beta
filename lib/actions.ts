@@ -289,6 +289,7 @@ export async function updateUser(formData: FormData) {
       };
     }
     const res = await updatedUser(newFormData as FormState);
+    console.log(res)
     if (!res.ok) {
       return { error: 'Error updating user' };
     }

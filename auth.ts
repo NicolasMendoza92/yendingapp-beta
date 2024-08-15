@@ -17,6 +17,7 @@ export const {
   // Esto es para que cuando se verifique el email, nextauth actualice el emailVerified.
   events: {
     async linkAccount({ user }) {
+      console.log('user', user)
       const userToUpdate = await prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: new Date() }
