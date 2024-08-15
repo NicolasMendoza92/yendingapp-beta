@@ -9,15 +9,15 @@ export default function LoginPage() {
   return (
     <Suspense fallback={<Loader />}>
     <div className="grid place-items-center h-screen mx-2 ">
-      <div className="bg-primary_b shadow-lg text-black rounded-lg border-t-4">
+      <div className="bg-primary_b shadow-lg text-black rounded-lg">
         <div className="relative mb-6">
           <Image
             src="/images/celebrate.jpg"
             alt="Descriptive Alt Text"
             priority={true}
             className="rounded-t-lg w-auto h-64"
-            width={0}
-            height={0}
+            width={500}
+            height={200}
           />
         </div>
         <div className="p-5 gap-3 ">

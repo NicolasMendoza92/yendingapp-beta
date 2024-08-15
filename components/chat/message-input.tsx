@@ -1,5 +1,5 @@
 import { UserFormState } from '@/types/onboarding';
-import CustomInput from '../customComponents/CustomInput';
+import ChatInput from '../customComponents/ChatInput';
 import { sendMessage } from '@/lib/actions';
 import { useState } from 'react';
 
@@ -33,7 +33,7 @@ const MessageInput = ({ publish, user, disabled, channel }: MessageInputProps) =
     <footer className="border-t border-gray-300 bg-white p-4">
       <form action={handleSubmit}>
         <div className="flex items-center">
-          <CustomInput
+          <ChatInput
             type="text"
             name="message"
             label=""

@@ -14,6 +14,7 @@ interface LocationAutocompleteProps {
   hasMin?: boolean;
   hasMax?: boolean;
   initialValue?: string;
+  disabled?: boolean;
 }
 
 function LocationAutocomplete({
@@ -24,6 +25,7 @@ function LocationAutocomplete({
   required,
   initialValue = "",
   type,
+  disabled,
 }: LocationAutocompleteProps) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_API as string,
@@ -81,6 +83,7 @@ function LocationAutocomplete({
           value={value}
           onChange={handleChange}
           className={`w-full ${value ? "text-secondary" : "text-secondary"}`}
+          disabled={disabled}
         />
       </Autocomplete>
     </>

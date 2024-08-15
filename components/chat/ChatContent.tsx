@@ -39,15 +39,19 @@ const Chat = ({ channelName, user, users, initialMessages }: ChatProps) => {
       },
     });
   };
- 
+
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen flex-col lg:flex-row lg:overflow-hidden">
       <ChatSideBar users={users} userDataId={user.user_id} />
       <div className="flex w-full flex-col">
         <div className="flex-1 overflow-y-auto">
-          <MessageList messages={messages} userDataId={user.user_id} initialMessages={initialMessages}/>
+          <MessageList
+            messages={messages}
+            userDataId={user.user_id}
+            initialMessages={initialMessages}
+          />
         </div>
-        <MessageInput publish={publishMessage} user={user} channel={channelName}/>
+        <MessageInput publish={publishMessage} user={user} channel={channelName} />
       </div>
     </div>
   );

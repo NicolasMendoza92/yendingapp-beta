@@ -10,11 +10,11 @@ type SideBarProps = {
 
 const ChatSideBar = ({ users, userDataId }: SideBarProps) => {
   return (
-    <div className="flex w-60 flex-col border-r border-gray-300 bg-white">
+    <div className="flex sm:w-full w-60 flex-col sm:flex-row border-r border-gray-300 bg-white">
       <header className="flex items-center justify-between border-b border-gray-300 bg-secondary_b p-4 text-white">
         <h1 className="text-xl font-semibold">Participants</h1>
       </header>
-      <div className="mt-2 flex-1 overflow-y-auto">
+      <div className="mt-2 flex-1 overflow-y-auto ">
         {users?.map((user, i) => (
           <div
             className={`mb-2 flex cursor-pointer items-center rounded-md p-2 hover:bg-secondary hover:text-primary ${user.user_id === userDataId && 'bg-primary_b text-primary'}`}

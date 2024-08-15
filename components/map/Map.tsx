@@ -1,26 +1,30 @@
-/* 
-Since the map was loaded on client side, 
-we need to make this component client rendered as well else error occurs
-*/
-"use client";
+'use client';
 
-//Map component Component from library
-import { GoogleMap, Marker } from "@react-google-maps/api";
-import { Previas } from "@/types/data";
-import { useCallback, useEffect, useState } from "react";
-import MapInfoWindow from "./MapInfoWindows";
-import { defaultMapCenter, defaultMapContainerStyle, defaultMapOptions, defaultMapZoom } from "@/lib/constants";
-
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import { Previas } from '@/types/data';
+import { useCallback, useEffect, useState } from 'react';
+import MapInfoWindow from './MapInfoWindows';
+import {
+  defaultMapCenter,
+  defaultMapContainerStyle,
+  defaultMapOptions,
+  defaultMapZoom,
+} from '@/lib/constants';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { handleQueryParams } from '@/lib/utils';
 
 type MapComponentProps = {
-  previas: Previas[];
+  previas?: Previas[];
 };
 
 export default function MapComponent({ previas }: MapComponentProps) {
-  const [selectedPrevia, setSelectedPrevia] = useState<Previas | undefined>(
-    undefined,
-  );
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  const [selectedPrevia, setSelectedPrevia] = useState<Previas | undefined>(undefined);
   const [mapCenter, setMapCenter] = useState(defaultMapCenter);
+  const [selectedPoint, setSelectedPoint] = useState<{ lat: number; lng: number } | null>(null);
 
   const handleMarkerClick = useCallback((previa: Previas) => {
     setSelectedPrevia(previa);
@@ -29,6 +33,27 @@ export default function MapComponent({ previas }: MapComponentProps) {
   const handleInfoWindowCloseClick = useCallback(() => {
     setSelectedPrevia(undefined);
   }, []);
+
+  const handleMapClick = (event: google.maps.MapMouseEvent) => {
+    if (event.latLng) {
+      const latLng = event.latLng.toJSON();
+      setSelectedPoint(latLng);
+      handleQueryParams({
+        searchParams,
+        pathname,
+        replace,
+        values: [
+          {
+            value: latLng.lat.toString(),
+            query: 'lat',
+          },
+          {
+            value: latLng.lng.toString(),
+            query: 'lng',}
+        ],
+      });
+    }
+  };
 
   const customIcon = (url: string) => ({
     url,
@@ -56,15 +81,14 @@ export default function MapComponent({ previas }: MapComponentProps) {
         center={mapCenter}
         zoom={defaultMapZoom}
         options={defaultMapOptions}
+        onClick={handleMapClick} // Add the onClick handler
       >
         <Marker position={mapCenter} />
-        {previas.map((previa, index) => (
+        {previas?.map((previa, index) => (
           <Marker
             key={`${previa.previa_id}_${index}`}
             position={getPosition(previa?.lat, previa?.lng)}
-            icon={customIcon(
-              previa?.images_previa_url?.[0] || "/images/placeholder.jpg",
-            )}
+            icon={customIcon(previa?.images_previa_url?.[0] || '/images/placeholder.jpg')}
             onClick={() => handleMarkerClick(previa)}
           />
         ))}
@@ -73,6 +97,11 @@ export default function MapComponent({ previas }: MapComponentProps) {
             position={getPosition(selectedPrevia?.lat, selectedPrevia?.lng)}
             onCloseClick={handleInfoWindowCloseClick}
             previa={selectedPrevia}
+          />
+        )}
+        {selectedPoint && (
+          <Marker
+            position={selectedPoint}
           />
         )}
       </GoogleMap>

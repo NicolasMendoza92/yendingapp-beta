@@ -17,7 +17,7 @@ const CustomDropDowns = ({
   label,
   values,
   type,
-  initialValue = '',
+  initialValue,
 }: CustomDropDownsProps) => {
   const [value, setValue] = useState(initialValue)
   const handleChange = (e: { target: any }) => {

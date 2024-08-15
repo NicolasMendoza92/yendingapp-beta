@@ -56,7 +56,8 @@ export const updatedUser = async (formData: FormState) => {
     } else {
       console.error('Failed to update user:', response.status)
     }
-    return response
+    const data = await response.json()
+    return data
   } catch (err) {
     console.log(err)
     throw new Error('Error updating user')

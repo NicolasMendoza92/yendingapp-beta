@@ -10,7 +10,6 @@ type CustomInputProps = {
   hasMax?: boolean;
   initialValue?: string;
   disabled?: boolean;
-  customClass?: string;
 };
 
 const CustomInput = ({
@@ -30,10 +29,6 @@ const CustomInput = ({
     e.preventDefault();
     setValue(e.target.value);
   };
-
-  // useEffect(() => {
-  //   setValue('');
-  // }, [onReset]);
 
   return (
     <>

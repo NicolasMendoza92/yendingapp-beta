@@ -42,7 +42,7 @@ export const DeleteButton = ({ previa_id }: { previa_id?: string }) => {
   );
 };
 
-export const EditButton = ({ date }: { date?: string | Date }) => {
+export const EditButton = ({ date, previa_id }: { date?: string | Date; previa_id?: string }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -57,6 +57,9 @@ export const EditButton = ({ date }: { date?: string | Date }) => {
           value: 'true',
           query: 'modal',
         },
+        {
+          value: previa_id,
+          query: 'previa_id',}
       ],
     });
 
@@ -90,7 +93,7 @@ export const Modal = ({
       searchParams,
       pathname,
       replace,
-      values:[{query: 'modal'}],
+      values: [{ query: 'modal' }, { query: 'previa_id' }],
     });
 
   const handleBackdropClick = (event: { target: any; currentTarget: any }) => {
@@ -99,7 +102,7 @@ export const Modal = ({
         searchParams,
         pathname,
         replace,
-        values:[{query: 'modal'}],
+        values: [{ query: 'modal' }, { query: 'previa_id' }],
       });
     }
   };

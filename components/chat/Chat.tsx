@@ -18,7 +18,7 @@ export default function Chat({ params, apiKey, userData, users, initialMessages 
   // 👉 Instantiate Ably client
   const client = new Realtime({
     key: apiKey,
-    clientId: userData.user_id,
+    clientId: userData.user_id || userData.name,
   });
   const channelName = `chat:${params.channel || 'general'}`;
   return (

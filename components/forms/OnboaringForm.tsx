@@ -25,6 +25,8 @@ export default function OnboardingForm({ user }: { user?: FormState }) {
     }
   };
 
+  console.log("user:", user?.name);
+
   return (
     <form action={handleForm}>
       <div className="grid grid-cols-3 gap-3 text-secondary">

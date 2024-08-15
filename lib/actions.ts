@@ -129,7 +129,7 @@ export async function authenticate(_prevState: string | undefined, formData: For
     await signIn('credentials', {
       email: parsedData.email,
       password: parsedData.password,
-      redirectTo: '/dashboard'
+      redirect: false
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -292,7 +292,7 @@ export async function updateUser(formData: FormData) {
     if (!res.ok) {
       return { error: 'Error updating user' };
     }
-    await update({ ...user, userData: newFormData });
+    await update({ ...user, userData: res.updatedUser });
   } catch (error) {
     console.error('Error updating user:', error);
     return { error: 'Error updating user' };
@@ -301,8 +301,10 @@ export async function updateUser(formData: FormData) {
   redirect('/dashboard');
 }
 
-export async function createPrevia(_prevState: void | undefined, formData: FormData) {
-  console.log(formData);
+export async function createPrevia(
+  _prevState: void | undefined,
+  formData: FormData,
+) {
   const {
     location,
     date,

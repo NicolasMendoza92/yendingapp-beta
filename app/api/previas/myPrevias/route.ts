@@ -14,18 +14,19 @@ export async function GET(req: NextRequest) {
     const previas_ids = values?.previas_requests;
     const user_id = values?.user_id;
 
+
     if (!Array.isArray(previas_ids) || !previas_ids.length) {
       return NextResponse.json({ message: 'No IDs provided' }, { status: 400 });
     }
 
-    let tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    let yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
 
     const previa_data = await prisma.previas.findMany({
       where: {
         previa_id: { in: previas_ids },
         date: {
-          gte: tomorrow,
+          gte: yesterday,
         },
         join_requests: {
           some: {
@@ -34,7 +35,6 @@ export async function GET(req: NextRequest) {
         },
       },
     });
-
     if (!previa_data || previa_data.length === 0) {
       return NextResponse.json({ message: 'Previa not found' }, { status: 404 });
     }

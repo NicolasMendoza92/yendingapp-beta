@@ -7,14 +7,14 @@ export default function register() {
   return (
     <Suspense fallback={<Loader />}>
       <div className="grid place-items-center h-screen mx-2">
-        <div className="shadow-lg bg-secondary_b text-primary rounded-lg border-t-4">
+        <div className="shadow-lg bg-secondary_b text-primary rounded-lg">
           <div className="w-full h-64 relative mb-6">
             <Image
               src="/images/regis.jpg"
               alt="Descriptive Alt Text"
-              layout="fill"
-              objectFit="cover"
               className="rounded-t-lg"
+              width={500}
+              height={200}
             />
           </div>
           <div className="p-5 gap-3">

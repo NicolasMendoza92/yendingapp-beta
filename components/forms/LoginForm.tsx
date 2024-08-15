@@ -1,5 +1,6 @@
 'use client'
 
+import { useTransitionRouter as useRouter } from 'next-view-transitions'
 import toast from 'react-hot-toast'
 import { CustomButton } from '../buttons/CustomButton'
 import { authenticate } from '@/lib/actions'
@@ -10,6 +11,7 @@ export default function LoginForm() {
 
   const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [formValues, setFormValues] = useState({ email: '', password: '' });
+  const router = useRouter()
 
   const handleLogin = async (formData: FormData) => {
 
@@ -38,6 +40,7 @@ export default function LoginForm() {
     });
   } else if (res?.success) {
     toast.success(res.success || "Operation successful");
+    router.push('/dashboard')
   } else if (res?.twoFactor) {
     setShowTwoFactor(true);
     toast.success("Verification code sent, please check your email");

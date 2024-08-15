@@ -36,7 +36,7 @@ export async function PUT(req: NextRequest) {
       };
     }
     // Actualizar el usuario en la base de datos
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: {
         id: user_data.id,
       },
@@ -56,7 +56,7 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { user_data },
+      { updatedUser },
       // { message: "Usuario modificado" },
       { status: 200 },
     );
