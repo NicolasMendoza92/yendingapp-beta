@@ -20,6 +20,11 @@ const RootLayout = ({ children }:RootLayoutProps) => {
   return (
     <ViewTransitions>
     <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/images/logo.png" />
+      </head>
       <body>
         <AuthProvider>
           <div>

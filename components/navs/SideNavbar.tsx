@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { FaGlassCheers } from "react-icons/fa";
+//import { FaGlassCheers } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
 import NavLinks from "./nav-links";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 function SideNavbar() {
   const [open, setOpen] = useState(false);
@@ -23,7 +24,7 @@ function SideNavbar() {
         </button>
         <div className="text-3xl flex grow justify-center mr-6">
           <Link href="/dashboard">
-          <FaGlassCheers />
+          <Image src="/images/logo.png" alt="Yending Logo" width={48} height={48} />
           </Link>
         </div>
       </div>
