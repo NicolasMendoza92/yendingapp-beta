@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       verificationToken.token
     )
 
-    return NextResponse.json({ message: 'Confirmation email sent' }, { status: 201 });
+    return NextResponse.json({ message: 'User Created sucessfully...check you email box to confirmate' }, { status: 201 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: 'A ocurrido un error' }, { status: 500 });

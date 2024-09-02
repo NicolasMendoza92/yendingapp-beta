@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
+    
     const creatorData = {
       user_id: user?.user_id,
       photo: user?.url_img,

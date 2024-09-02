@@ -79,30 +79,32 @@ export const getUsers = async (previaId: string) => {
   }
 }
 
-// añado unos generales para conseguir users
-export const getUserByEmail = async (email: string) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: {
-        email
-      }
-    })
-    return user
-  } catch {
-    return null
-  }
+
+export const getUserByEmail = async (email:string) => {
+try {
+  const response = await customFetch({
+    path: `/api/user/getUserByEmail?email=${email}`,
+    method: 'GET',
+    withCredentials: false,
+  })
+  const data = await response.json()
+  return data?.user
+} catch (error) {
+  
+}
 }
 
 export const getUserById = async (id: string) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id
-      }
+    const response = await customFetch({
+      path: `/api/user/getUserById?id=${id}`,
+      method: 'GET',
+      withCredentials: false,
     })
-    return user
-  } catch {
-    return null
+    const data = await response.json()
+    return data?.user
+  } catch (error) {
+    
   }
 }
 
